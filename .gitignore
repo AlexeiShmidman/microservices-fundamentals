@@ -1,0 +1,15 @@
+/docs
+/.idea
+/target
+/resource-service/.idea
+/resource-service/target
+/resource-service/docs
+/resource-service/.classpath
+/resource-service/.project
+/song-service/.idea
+/song-service/target
+/song-service/docs
+/song-service/.classpath
+/song-service/.project
+
+
