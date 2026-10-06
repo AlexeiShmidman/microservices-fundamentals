@@ -11,5 +11,8 @@
 /song-service/docs
 /song-service/.classpath
 /song-service/.project
-
-
+/resource-processor/.idea
+/resource-processor/target
+/resource-processor/docs
+/resource-processor/.classpath
+/resource-processor/.project

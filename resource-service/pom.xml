@@ -22,7 +22,20 @@
     <java.version>17</java.version>
     <tika.version>2.9.2</tika.version>
     <resilience4j.version>2.2.0</resilience4j.version>
+    <aws.sdk.version>2.28.0</aws.sdk.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${aws.sdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <!-- Spring Boot Web -->
@@ -70,6 +83,12 @@
       <artifactId>httpclient5</artifactId>
     </dependency>
 
+    <!-- AWS S3 SDK v2 -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+    </dependency>
+
     <!-- Resilience4j: retry + circuit-breaker for Song Service calls -->
     <dependency>
       <groupId>io.github.resilience4j</groupId>
@@ -99,4 +118,3 @@
     </plugins>
   </build>
 </project>
-

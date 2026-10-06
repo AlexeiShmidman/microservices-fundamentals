@@ -25,13 +25,16 @@ public class ResourceService {
 
   private final ResourceRepository resourceRepository;
   private final Mp3MetadataExtractor metadataExtractor;
+  private final S3StorageService storageService;
   private final SongServiceClient songServiceClient;
 
   public ResourceService(ResourceRepository resourceRepository,
     Mp3MetadataExtractor metadataExtractor,
+    S3StorageService storageService,
     SongServiceClient songServiceClient) {
     this.resourceRepository = resourceRepository;
     this.metadataExtractor = metadataExtractor;
+    this.storageService = storageService;
     this.songServiceClient = songServiceClient;
   }
 
@@ -43,9 +46,12 @@ public class ResourceService {
     }
     metadataExtractor.validateMp3(data);
 
+    String key = "resources/resource-" + System.currentTimeMillis() + ".mp3";
+    storageService.upload(key, data, "audio/mpeg");
+
     Resource resource = Resource.builder()
-      .name("resource-" + System.currentTimeMillis())
-      .data(data)
+      .name(key)
+      .storageLocation(key)
       .contentType("audio/mpeg")
       .size((long) data.length)
       .build();
@@ -62,10 +68,10 @@ public class ResourceService {
   @Transactional(readOnly = true)
   public byte[] getResourceData(Long id) {
     validatePositiveId(id);
-    return resourceRepository.findById(id)
-      .map(Resource::getData)
+    Resource resource = resourceRepository.findById(id)
       .orElseThrow(() -> new ResourceNotFoundException(
         "Resource with ID=" + id + " not found"));
+    return storageService.download(resource.getStorageLocation());
   }
 
   @Transactional
@@ -79,11 +85,20 @@ public class ResourceService {
       .collect(Collectors.toList());
 
     if (!foundIds.isEmpty()) {
+      List<String> storageKeys = found.stream()
+        .map(Resource::getStorageLocation)
+        .collect(Collectors.toList());
+
       resourceRepository.deleteAllById(foundIds);
       String idsStr = foundIds.stream()
         .map(String::valueOf)
         .collect(Collectors.joining(","));
       songServiceClient.deleteSongMetadata(idsStr);
+
+      // S3 deletion runs last: if DB or song-service fails the transaction rolls back
+      // and S3 is untouched. An orphaned S3 object is recoverable; a ghost DB record
+      // pointing to a missing S3 key causes every subsequent GET to fail.
+      storageKeys.forEach(storageService::delete);
       log.info("Deleted resources: {}", foundIds);
     }
 

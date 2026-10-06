@@ -32,6 +32,25 @@ services:
       timeout: 5s
       retries: 5
 
+  minio:
+    image: ghcr.io/coollabsio/minio:latest
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: [ "CMD", "mc", "ready", "local" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - "9000:9000" # API Port
+      - "9001:9001" # Web Console Port
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+
   resource-service:
     build: ./resource-service
     ports:
@@ -41,8 +60,15 @@ services:
       SPRING_DATASOURCE_USERNAME: ${RESOURCE_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${RESOURCE_DB_PASSWORD}
       SONG_SERVICE_BASE_URL: ${SONG_SERVICE_BASE_URL}
+      AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
+      AWS_S3_REGION: ${AWS_S3_REGION}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+      AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER}
+      AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD}
     depends_on:
       resource-db:
+        condition: service_healthy
+      minio:
         condition: service_healthy
 
   song-service:
@@ -57,3 +83,10 @@ services:
       song-db:
         condition: service_healthy
 
+  resource-processor:
+    build: ./resource-processor
+    environment:
+      SPRING_APPLICATION_NAME: resource-processor
+
+volumes:
+  minio_data:

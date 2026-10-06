@@ -49,6 +49,14 @@ resilience4j:
         retry-exceptions:
           - com.example.resourceservice.exception.SongServiceException
 
+aws:
+  s3:
+    endpoint: "${AWS_S3_ENDPOINT:http://localhost:9000}"
+    region: "${AWS_S3_REGION:us-east-1}"
+    bucket-name: "${AWS_S3_BUCKET_NAME:resource-bucket}"
+    access-key: "${AWS_ACCESS_KEY_ID:minioadmin}"
+    secret-key: "${AWS_SECRET_ACCESS_KEY:minioadmin}"
+
 logging:
   level:
     com.example.resourceservice: DEBUG

@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: resource-processor
+  main:
+    web-application-type: none
+
+logging:
+  level:
+    com.example.resourceprocessor: DEBUG

@@ -18,8 +18,8 @@ public class Resource {
   @Column(nullable = false)
   private String name;
 
-  @Column(nullable = false)
-  private byte[] data;
+  @Column(name = "storage_location", nullable = false)
+  private String storageLocation;
 
   @Column(name = "content_type", nullable = false)
   private String contentType;
@@ -30,10 +30,10 @@ public class Resource {
   public Resource() {
   }
 
-  public Resource(Long id, String name, byte[] data, String contentType, Long size) {
+  public Resource(Long id, String name, String storageLocation, String contentType, Long size) {
     this.id = id;
     this.name = name;
-    this.data = data;
+    this.storageLocation = storageLocation;
     this.contentType = contentType;
     this.size = size;
   }
@@ -54,12 +54,12 @@ public class Resource {
     this.name = name;
   }
 
-  public byte[] getData() {
-    return data;
+  public String getStorageLocation() {
+    return storageLocation;
   }
 
-  public void setData(byte[] data) {
-    this.data = data;
+  public void setStorageLocation(String storageLocation) {
+    this.storageLocation = storageLocation;
   }
 
   public String getContentType() {
@@ -86,7 +86,7 @@ public class Resource {
 
     private Long id;
     private String name;
-    private byte[] data;
+    private String storageLocation;
     private String contentType;
     private Long size;
 
@@ -100,8 +100,8 @@ public class Resource {
       return this;
     }
 
-    public Builder data(byte[] data) {
-      this.data = data;
+    public Builder storageLocation(String storageLocation) {
+      this.storageLocation = storageLocation;
       return this;
     }
 
@@ -116,7 +116,7 @@ public class Resource {
     }
 
     public Resource build() {
-      return new Resource(id, name, data, contentType, size);
+      return new Resource(id, name, storageLocation, contentType, size);
     }
   }
 }
